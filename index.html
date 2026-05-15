@@ -100,12 +100,11 @@ body{overflow:hidden;}
 /* ── DONE SCREEN ── */
 #done-screen{align-items:center;justify-content:center;text-align:center;padding:24px;}
 
-/* ── STATS SCREEN ── */
-#stats-screen{padding:20px 16px 16px;background:#f4f4f6;}
-#stats-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-shrink:0;}
+/* ── STATS OVERLAY ── */
+#stats-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-shrink:0;}
 #stats-header h2{font-size:18px;font-weight:900;color:#1a1b26;}
-#stats-body{flex:1;overflow-y:auto;display:flex;flex-direction:column;align-items:center;}
-#stats-card{background:#fff;border-radius:20px;padding:20px 16px;width:100%;max-width:400px;box-shadow:0 2px 12px rgba(0,0,0,.06);}
+#stats-body{overflow-y:auto;display:flex;flex-direction:column;align-items:center;max-height:75dvh;}
+#stats-card{padding:4px 0;width:100%;}
 /* Heatmap */
 #heatmap-wrap{width:100%;overflow-x:hidden;margin-bottom:6px;}
 #heatmap-container{display:flex;flex-direction:column;width:100%;}
@@ -120,6 +119,7 @@ body{overflow:hidden;}
 .hm-day.l2{background:#8b5cf6;}
 .hm-day.l3{background:#6d28d9;}
 .hm-day.l4{background:#4c1d95;}
+.hm-day.l5{background:#2e1065;}
 .hm-day.today-dot{outline:1.5px solid #6558f5;outline-offset:1px;}
 .hm-day.faded{opacity:0;pointer-events:none;}
 /* 點擊顯示 tooltip */
@@ -139,6 +139,11 @@ body{overflow:hidden;}
 #total-time-text{flex:1;}
 #total-time-val{font-size:20px;font-weight:900;color:#6558f5;}
 #total-time-label{font-size:11px;color:#9ca3af;margin-top:1px;}
+
+/* ── TOGGLE SWITCH ── */
+#set-autoplay:checked + #toggle-autoplay{background:#6558f5;}
+#toggle-autoplay:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s;}
+#set-autoplay:checked + #toggle-autoplay:before{transform:translateX(20px);}
 
 /* ── OVERLAYS ── */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;align-items:center;justify-content:center;}
@@ -262,45 +267,45 @@ body{overflow:hidden;}
   <div style="font-size:52px;margin-bottom:16px;">🎉</div>
   <h2 style="font-size:22px;font-weight:800;color:#1a1b26;margin-bottom:8px;">全部學習完成！</h2>
   <p style="font-size:13px;color:#9ca3af;margin-bottom:32px;">今天的單字都已經背熟了</p>
-  <div style="display:flex;gap:10px;">
-    <button id="done-home-btn" style="padding:12px 24px;background:#f3f4f6;color:#374151;border:none;border-radius:99px;font-size:14px;font-weight:600;cursor:pointer;">🏠 返回</button>
-    <button id="restart-btn" style="padding:12px 24px;background:#1a1b26;color:#fff;border:none;border-radius:99px;font-size:14px;font-weight:600;cursor:pointer;">↺ 重新開始</button>
-  </div>
+  <button id="done-home-btn" style="padding:12px 28px;background:#1a1b26;color:#fff;border:none;border-radius:99px;font-size:14px;font-weight:600;cursor:pointer;">🏠 返回牌組</button>
 </div>
 
-<!-- ══════════════ STATS SCREEN ══════════════ -->
-<div id="stats-screen" class="screen">
-  <div id="stats-header">
-    <h2>📊 學習統計</h2>
-    <button class="icon-btn" id="stats-close-btn">✕</button>
-  </div>
-  <div id="stats-body">
-    <div id="stats-card">
-      <div id="heatmap-wrap">
-        <div id="heatmap-container">
-          <div id="heatmap-month-row"></div>
-          <div id="heatmap-grid"></div>
+<!-- ══════════════ STATS OVERLAY ══════════════ -->
+<div id="stats-overlay" class="overlay">
+  <div class="panel" style="width:min(95vw,420px);max-height:88dvh;overflow-y:auto;">
+    <button class="panel-close" id="stats-close-btn">✕</button>
+    <div id="stats-header">
+      <h2>📊 學習統計</h2>
+    </div>
+    <div id="stats-body">
+      <div id="stats-card">
+        <div id="heatmap-wrap">
+          <div id="heatmap-container">
+            <div id="heatmap-month-row"></div>
+            <div id="heatmap-grid"></div>
+          </div>
         </div>
-      </div>
-      <div id="hm-tooltip">點擊格子查看當日紀錄</div>
-      <div id="heatmap-legend">
-        <span class="legend-label">少</span>
-        <span class="legend-box" style="background:#f0f1f5;border:1px solid #e5e7eb;"></span>
-        <span class="legend-box hm-day l1"></span>
-        <span class="legend-box hm-day l2"></span>
-        <span class="legend-box hm-day l3"></span>
-        <span class="legend-box hm-day l4"></span>
-        <span class="legend-label">多</span>
-      </div>
-      <div id="stats-summary"></div>
-      <div id="total-time-row">
-        <div id="total-time-icon">⏱️</div>
-        <div id="total-time-text">
-          <div id="total-time-val">0 分鐘</div>
-          <div id="total-time-label">累計學習時間</div>
+        <div id="hm-tooltip">點擊格子查看當日紀錄</div>
+        <div id="heatmap-legend">
+          <span class="legend-label">少</span>
+          <span class="legend-box" style="background:#f0f1f5;border:1px solid #e5e7eb;"></span>
+          <span class="legend-box hm-day l1"></span>
+          <span class="legend-box hm-day l2"></span>
+          <span class="legend-box hm-day l3"></span>
+          <span class="legend-box hm-day l4"></span>
+          <span class="legend-box hm-day l5"></span>
+          <span class="legend-label">多</span>
         </div>
+        <div id="stats-summary"></div>
+        <div id="total-time-row">
+          <div id="total-time-icon">⏱️</div>
+          <div id="total-time-text">
+            <div id="total-time-val">0 分鐘</div>
+            <div id="total-time-label">累計學習時間</div>
+          </div>
+        </div>
+        <div id="deck-time-list" style="margin-top:10px;"></div>
       </div>
-      <div id="deck-time-list" style="margin-top:10px;"></div>
     </div>
   </div>
 </div>
@@ -359,7 +364,36 @@ body{overflow:hidden;}
         </select>
       </div>
     </div>
+    <div class="divider"></div>
+    <div class="setting-row">
+      <div class="setting-label">🔊 自動播放聲音</div>
+      <div class="setting-controls" style="justify-content:space-between;">
+        <span style="font-size:12px;color:#9ca3af;">卡片正面出現時自動播放</span>
+        <label style="position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0;">
+          <input type="checkbox" id="set-autoplay" style="opacity:0;width:0;height:0;">
+          <span id="toggle-autoplay" style="position:absolute;inset:0;background:#e5e7eb;border-radius:99px;cursor:pointer;transition:.3s;"></span>
+        </label>
+      </div>
+    </div>
+    <div class="setting-row">
+      <div class="setting-label">📅 每日學習上限（每牌組）</div>
+      <div class="setting-controls">
+        <input class="num-input" id="set-daily-limit" type="number" min="1" max="9999" value="50">
+        <span style="font-size:13px;color:#9ca3af;padding-left:8px;">張 / 天</span>
+      </div>
+    </div>
     <button class="panel-save" id="settings-save">儲存設定</button>
+  </div>
+</div>
+
+<!-- ══════════════ AUTOPLAY CONFIRM OVERLAY ══════════════ -->
+<div id="autoplay-confirm-overlay" class="overlay">
+  <div class="panel" style="width:min(88vw,340px);text-align:center;">
+    <div style="font-size:36px;margin-bottom:12px;">🔊</div>
+    <h2 style="margin-bottom:8px;">已開啟自動播放聲音</h2>
+    <p style="font-size:13px;color:#9ca3af;margin-bottom:24px;font-family:sans-serif;">請確認已佩戴耳機或<br>適合播放聲音的環境</p>
+    <button id="autoplay-confirm-ok" class="panel-save" style="margin-bottom:10px;">確定開始</button>
+    <button id="autoplay-confirm-cancel" style="width:100%;padding:12px;background:none;color:#9ca3af;border:none;font-size:14px;cursor:pointer;">取消</button>
   </div>
 </div>
 
@@ -606,7 +640,7 @@ var BUILTIN_CARDS = [
 // ════════════════════════════════════════════
 // SETTINGS
 // ════════════════════════════════════════════
-var DEFAULT_CFG={again:{val:3,unit:'count'},hard:{val:1,unit:'day'},good:{val:7,unit:'day'},easy:{val:30,unit:'day'}};
+var DEFAULT_CFG={again:{val:3,unit:'count'},hard:{val:1,unit:'day'},good:{val:7,unit:'day'},easy:{val:30,unit:'day'},autoplay:false,dailyLimit:50};
 var cfg;
 function loadCfg(){try{var s=localStorage.getItem('lec_cfg');cfg=s?JSON.parse(s):JSON.parse(JSON.stringify(DEFAULT_CFG));}catch(e){cfg=JSON.parse(JSON.stringify(DEFAULT_CFG));}}
 function saveCfg(){localStorage.setItem('lec_cfg',JSON.stringify(cfg));}
@@ -832,6 +866,24 @@ function renderDeckList(){
     ddRename.innerHTML='✏️ 重命名';
     ddRename.addEventListener('click',function(e){e.stopPropagation();closeAllDropdowns();renameDeck(deck);});
 
+    // Reset
+    var ddReset=document.createElement('div');
+    ddReset.className='dd-item';
+    ddReset.innerHTML='↺ 重新開始';
+    ddReset.addEventListener('click',function(e){
+      e.stopPropagation();
+      closeAllDropdowns();
+      if(!confirm('確定要重置「'+deck.name+'」的所有進度嗎？'))return;
+      deck.active=deck.cards.map(function(cc){return cc.id;});
+      deck.waiting=[];
+      deck.stats={again:0,hard:0,good:0,easy:0};
+      deck.studied={};
+      // 清除每日計數
+      localStorage.removeItem('lec_daily_'+deck.id);
+      saveDecks();
+      renderDeckList();
+    });
+
     // Export
     var ddExport=document.createElement('div');
     ddExport.className='dd-item';
@@ -850,6 +902,7 @@ function renderDeckList(){
     });
 
     dropdown.appendChild(ddRename);
+    dropdown.appendChild(ddReset);
     dropdown.appendChild(ddExport);
     dropdown.appendChild(ddDelete);
 
@@ -878,11 +931,23 @@ function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(
 // STUDY RENDER
 // ════════════════════════════════════════════
 function startStudy(){
+  // 自動播放確認窗
+  if(cfg.autoplay){
+    document.getElementById('autoplay-confirm-overlay').classList.add('open');
+    return;
+  }
+  _doStartStudy();
+}
+
+function _doStartStudy(){
   currentSessionDeckId=currentDeckId;
   startSession();
   promoteReady();
   var d=getDeck();
   isFlipped=false;
+  var limit=cfg.dailyLimit||50;
+  var todayDone=getTodayDeckCount(d.id);
+  if(todayDone>=limit){showScreen('done-screen');return;}
   if(!d.active.length&&!d.waiting.length){showScreen('done-screen');return;}
   if(!d.active.length&&d.waiting.length){renderWaiting();return;}
   showScreen('study-screen');
@@ -892,12 +957,15 @@ function startStudy(){
 function renderStudy(){
   promoteReady();
   var d=getDeck();
+  var limit=cfg.dailyLimit||50;
+  var todayDone=getTodayDeckCount(d.id);
+  // 達到每日上限
+  if(todayDone>=limit){showScreen('done-screen');return;}
   if(!d.active.length&&!d.waiting.length){showScreen('done-screen');return;}
   if(!d.active.length){renderWaiting();return;}
-  var total=d.cards.length;
-  var done=total-d.active.length-d.waiting.length;
-  document.getElementById('progress-text').textContent=(Math.max(done,0)+1)+' / '+total;
-  document.getElementById('progress-fill').style.width=(Math.max(done,0)/total*100)+'%';
+  // 進度條：以每日上限為分母
+  document.getElementById('progress-text').textContent=todayDone+' / '+limit;
+  document.getElementById('progress-fill').style.width=(todayDone/limit*100)+'%';
   var card=cardById(d.active[0]);
   if(!card)return;
   document.getElementById('front-word').textContent=card.word;
@@ -914,6 +982,8 @@ function renderStudy(){
   document.getElementById('st-hard').textContent=d.stats.hard;
   document.getElementById('st-good').textContent=d.stats.good;
   document.getElementById('st-easy').textContent=d.stats.easy;
+  // 自動播放（正面出現時）
+  if(!isFlipped&&cfg.autoplay)setTimeout(function(){playWord();},300);
 }
 
 function renderWaiting(){
@@ -950,8 +1020,9 @@ function doAction(type){
   // record studied
   if(!d.studied)d.studied={};
   d.studied[id]=true;
-  // record calendar
+  // record calendar & daily count
   recordStudy();
+  incTodayDeckCount(d.id);
 
   if(c.unit==='count'){
     if(type==='easy'){/* remove permanently */}
@@ -1027,18 +1098,36 @@ function formatTime(ms){
   return s+'秒';
 }
 
+function getTodayKey(){
+  var t=new Date();
+  return t.getFullYear()+'-'+(t.getMonth()+1)+'-'+t.getDate();
+}
+
+function getTodayDeckCount(deckId){
+  var key='lec_daily_'+deckId;
+  var rec=JSON.parse(localStorage.getItem(key)||'{}');
+  return rec[getTodayKey()]||0;
+}
+
+function incTodayDeckCount(deckId){
+  var key='lec_daily_'+deckId;
+  var rec=JSON.parse(localStorage.getItem(key)||'{}');
+  var today=getTodayKey();
+  rec[today]=(rec[today]||0)+1;
+  localStorage.setItem(key,JSON.stringify(rec));
+}
+
 function recordStudy(){
   var today=new Date();
   var key=today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
   var rec=JSON.parse(localStorage.getItem('lec_calendar')||'{}');
   rec[key]=(rec[key]||0)+1;
   localStorage.setItem('lec_calendar',JSON.stringify(rec));
-  // 重置閒置計時（使用者正在學習）
   resetIdleTimer();
 }
 
 function renderCalendar(){
-  showScreen('stats-screen');
+  document.getElementById('stats-overlay').classList.add('open');
   var now=new Date();
   var rec=JSON.parse(localStorage.getItem('lec_calendar')||'{}');
   var timeRec=JSON.parse(localStorage.getItem('lec_time')||'{}');
@@ -1054,22 +1143,13 @@ function renderCalendar(){
   var hmStart=new Date(rangeStart);
   hmStart.setDate(hmStart.getDate()-hmStart.getDay());
 
-  // ── 找最大值（只在範圍內） ──
-  var maxVal=1;
-  var cur=new Date(hmStart);
-  while(cur<=endDate){
-    var k=cur.getFullYear()+'-'+(cur.getMonth()+1)+'-'+cur.getDate();
-    if(rec[k]&&rec[k]>maxVal)maxVal=rec[k];
-    cur.setDate(cur.getDate()+1);
-  }
-
   function levelClass(val){
     if(!val||val<=0)return '';
-    var r=val/maxVal;
-    if(r<=0.25)return 'l1';
-    if(r<=0.5)return 'l2';
-    if(r<=0.75)return 'l3';
-    return 'l4';
+    if(val<=10)return 'l1';
+    if(val<=20)return 'l2';
+    if(val<=30)return 'l3';
+    if(val<=40)return 'l4';
+    return 'l5';
   }
 
   // ── 建立週欄陣列 ──
@@ -1089,37 +1169,37 @@ function renderCalendar(){
   var totalWeeks=weeks.length;
   var CELL=11, GAP=2;
 
-  // ── 月份標籤列 ──
+  // ── 月份標籤列（置中對齊每月格子）──
   var monthRow=document.getElementById('heatmap-month-row');
   monthRow.innerHTML='';
-  // 找每個月第一次出現在哪一週（weekIdx）
-  var monthFirst={}; // {monthKey: weekIdx}
+  monthRow.style.cssText='display:flex;gap:'+GAP+'px;margin-bottom:3px;';
+  // 計算每個月佔了哪幾週（weekIdx 範圍）
+  var monthWeeks={}; // {monthKey: [firstWeekIdx, lastWeekIdx]}
   weeks.forEach(function(weekStart,wi){
     for(var day=0;day<7;day++){
       var dd=new Date(weekStart);
       dd.setDate(dd.getDate()+day);
       if(dd<rangeStart||dd>endDate)continue;
       var mk=dd.getFullYear()+'-'+dd.getMonth();
-      if(monthFirst[mk]===undefined)monthFirst[mk]=wi;
+      if(!monthWeeks[mk])monthWeeks[mk]=[wi,wi];
+      else monthWeeks[mk][1]=wi;
     }
   });
-  // 建立標籤列（每週一格）
+  // 建立標籤列（每週一格，有月份的週顯示標籤，並用 text-align center）
+  // 先建週格，再合並有相同月份的
   weeks.forEach(function(weekStart,wi){
     var span=document.createElement('span');
-    span.style.cssText='display:inline-block;width:'+(CELL)+'px;flex-shrink:0;font-size:9px;color:#9ca3af;font-weight:700;overflow:visible;white-space:nowrap;';
-    // 找這週是否有月份第一次出現
-    var label='';
-    Object.keys(monthFirst).forEach(function(mk){
-      if(monthFirst[mk]===wi){
-        var parts=mk.split('-');
-        label=monthNames[parseInt(parts[1])];
-      }
-    });
-    span.textContent=label;
-    if(wi<totalWeeks-1){
-      span.style.marginRight=GAP+'px';
-    }
+    span.style.cssText='display:inline-block;width:'+(CELL)+'px;flex-shrink:0;font-size:9px;color:#9ca3af;font-weight:700;text-align:center;overflow:visible;white-space:nowrap;';
     monthRow.appendChild(span);
+  });
+  // 對每個月，找中間那週，把標籤放進去
+  Object.keys(monthWeeks).forEach(function(mk){
+    var range=monthWeeks[mk];
+    var midWi=Math.round((range[0]+range[1])/2);
+    var parts=mk.split('-');
+    var label=monthNames[parseInt(parts[1])];
+    var spans=monthRow.querySelectorAll('span');
+    if(spans[midWi])spans[midWi].textContent=label;
   });
 
   // ── 格子列 ──
@@ -1265,7 +1345,7 @@ function downloadTemplate(){
 // ════════════════════════════════════════════
 // Deck screen
 // deck-start-btn removed
-document.getElementById('open-stats-btn').addEventListener('click',function(){calYear=null;renderCalendar();});
+document.getElementById('open-stats-btn').addEventListener('click',function(){renderCalendar();});
 document.getElementById('open-upload-btn').addEventListener('click',function(){document.getElementById('upload-overlay').classList.add('open');});
 document.getElementById('open-settings-btn').addEventListener('click',function(){openSettings();});
 
@@ -1274,7 +1354,7 @@ document.getElementById('front').addEventListener('click',function(){if(!isFlipp
 document.getElementById('play-btn-front').addEventListener('click',function(e){e.stopPropagation();playWord();});
 document.getElementById('play-btn-back').addEventListener('click',function(e){e.stopPropagation();playWord();});
 document.getElementById('back-to-decks-btn').addEventListener('click',function(){flushSession();if(waitTimer){clearInterval(waitTimer);waitTimer=null;}renderDeckList();});
-document.getElementById('study-stats-btn').addEventListener('click',function(){calYear=null;renderCalendar();});
+document.getElementById('study-stats-btn').addEventListener('click',function(){renderCalendar();});
 document.getElementById('study-settings-btn').addEventListener('click',function(){openSettings();});
 document.querySelectorAll('.action-btn').forEach(function(btn){btn.addEventListener('click',function(e){e.stopPropagation();doAction(btn.dataset.action);});});
 document.addEventListener('keydown',function(e){
@@ -1290,10 +1370,15 @@ document.getElementById('waiting-reset-btn').addEventListener('click',doReset);
 
 // Done screen
 document.getElementById('done-home-btn').addEventListener('click',function(){flushSession();renderDeckList();});
-document.getElementById('restart-btn').addEventListener('click',doReset);
+// restart-btn removed from done-screen
 
 // Stats screen
-document.getElementById('stats-close-btn').addEventListener('click',function(){renderDeckList();});
+document.getElementById('stats-close-btn').addEventListener('click',function(){
+  document.getElementById('stats-overlay').classList.remove('open');
+});
+document.getElementById('stats-overlay').addEventListener('click',function(e){
+  if(e.target===this)this.classList.remove('open');
+});
 // cal-prev/next removed (heatmap always shows recent 3 months)
 
 // Settings overlay
@@ -1302,15 +1387,38 @@ function openSettings(){
     document.getElementById('set-'+k+'-val').value=cfg[k].val;
     document.getElementById('set-'+k+'-unit').value=cfg[k].unit;
   });
+  document.getElementById('set-autoplay').checked=!!cfg.autoplay;
+  updateToggleStyle();
+  document.getElementById('set-daily-limit').value=cfg.dailyLimit||50;
   document.getElementById('settings-overlay').classList.add('open');
 }
+function updateToggleStyle(){
+  var tog=document.getElementById('toggle-autoplay');
+  tog.style.background=document.getElementById('set-autoplay').checked?'#6558f5':'#e5e7eb';
+}
+document.addEventListener('DOMContentLoaded',function(){
+  var chk=document.getElementById('set-autoplay');
+  if(chk)chk.addEventListener('change',updateToggleStyle);
+});
 document.getElementById('settings-close').addEventListener('click',function(){document.getElementById('settings-overlay').classList.remove('open');});
 document.getElementById('settings-overlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
 document.getElementById('settings-save').addEventListener('click',function(){
   ['again','hard','good','easy'].forEach(function(k){
     cfg[k]={val:parseInt(document.getElementById('set-'+k+'-val').value)||1,unit:document.getElementById('set-'+k+'-unit').value};
   });
+  cfg.autoplay=document.getElementById('set-autoplay').checked;
+  cfg.dailyLimit=parseInt(document.getElementById('set-daily-limit').value)||50;
   saveCfg();updateBtnLabels();document.getElementById('settings-overlay').classList.remove('open');
+});
+document.getElementById('set-autoplay').addEventListener('change',updateToggleStyle);
+
+// Autoplay confirm overlay
+document.getElementById('autoplay-confirm-ok').addEventListener('click',function(){
+  document.getElementById('autoplay-confirm-overlay').classList.remove('open');
+  _doStartStudy();
+});
+document.getElementById('autoplay-confirm-cancel').addEventListener('click',function(){
+  document.getElementById('autoplay-confirm-overlay').classList.remove('open');
 });
 
 // Upload overlay
