@@ -366,6 +366,26 @@ body{overflow:hidden;}
     </div>
     <div class="divider"></div>
     <div class="setting-row">
+      <div class="setting-label">📖 學習模式</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:10px 12px;border-radius:12px;border:1.5px solid #e5e7eb;background:#f9fafb;" id="mode-daily-label">
+          <input type="radio" name="study-mode" id="mode-daily" value="daily" style="margin-top:2px;accent-color:#6558f5;">
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#1a1b26;">每日重置模式</div>
+            <div style="font-size:11px;color:#9ca3af;margin-top:2px;">關閉後 Again 的卡不帶到明天，明天只看到到期卡＋新卡</div>
+          </div>
+        </label>
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:10px 12px;border-radius:12px;border:1.5px solid #e5e7eb;background:#f9fafb;" id="mode-continuous-label">
+          <input type="radio" name="study-mode" id="mode-continuous" value="continuous" style="margin-top:2px;accent-color:#6558f5;">
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#1a1b26;">連續模式</div>
+            <div style="font-size:11px;color:#9ca3af;margin-top:2px;">Again 的卡永遠留在待學習，明天繼續出現</div>
+          </div>
+        </label>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="setting-row">
       <div class="setting-label">🔊 自動播放聲音</div>
       <div class="setting-controls" style="justify-content:space-between;">
         <span style="font-size:12px;color:#9ca3af;">卡片正面出現時自動播放</span>
@@ -640,7 +660,7 @@ var BUILTIN_CARDS = [
 // ════════════════════════════════════════════
 // SETTINGS
 // ════════════════════════════════════════════
-var DEFAULT_CFG={again:{val:3,unit:'count'},hard:{val:1,unit:'day'},good:{val:7,unit:'day'},easy:{val:30,unit:'day'},autoplay:false,dailyLimit:50};
+var DEFAULT_CFG={again:{val:3,unit:'count'},hard:{val:1,unit:'day'},good:{val:7,unit:'day'},easy:{val:30,unit:'day'},autoplay:false,dailyLimit:50,studyMode:'daily'};
 var cfg;
 function loadCfg(){try{var s=localStorage.getItem('lec_cfg');cfg=s?JSON.parse(s):JSON.parse(JSON.stringify(DEFAULT_CFG));}catch(e){cfg=JSON.parse(JSON.stringify(DEFAULT_CFG));}}
 function saveCfg(){localStorage.setItem('lec_cfg',JSON.stringify(cfg));}
@@ -671,7 +691,32 @@ function loadDecks(){
     if(decks[0]&&!decks[0].isBuiltin&&decks[0].name&&decks[0].name.indexOf('預設')>=0)decks[0].isBuiltin=true;
     var ci=localStorage.getItem('lec_current');
     currentDeckId=ci||decks[0].id;
+    // 每日重置模式：清理上次 session 殘留的 Again 卡
+    applyDailyReset();
   }catch(e){decks=[makeDeck('法律英文 (預設)',BUILTIN_CARDS,true)];currentDeckId=decks[0].id;}
+}
+
+function applyDailyReset(){
+  if((cfg.studyMode||'daily')!=='daily')return;
+  var today=getTodayKey();
+  var lastKey=localStorage.getItem('lec_last_session_date');
+  if(lastKey===today)return; // 同一天，不重置
+  // 不同天：把每個牌組 active 裡「已學過」的卡移除（only studied ones）
+  // studied 裡的 id 是今日以前學過的，Again 留下的未學完的也在 active
+  // 策略：把 active 裡「不在 studied 中」的視為真正新卡保留
+  //        把「在 studied 中但又被放回 active（Again 殘留）」的移除
+  decks.forEach(function(deck){
+    if(!deck.studied)return;
+    var studiedSet=new Set(Object.keys(deck.studied).map(Number));
+    // 過濾掉 studied 但還留在 active 的卡（Again 殘留）
+    deck.active=deck.active.filter(function(id){
+      return !studiedSet.has(id);
+    });
+    // waiting 裡到期時間 < 今天開始的也要放回 active
+    // （promoteReady 會處理，這裡不重複）
+  });
+  localStorage.setItem('lec_last_session_date',today);
+  saveDecks();
 }
 
 function saveDecks(){localStorage.setItem('lec_decks',JSON.stringify(decks));localStorage.setItem('lec_current',currentDeckId);}
@@ -1023,6 +1068,7 @@ function doAction(type){
   // record calendar & daily count
   recordStudy();
   incTodayDeckCount(d.id);
+  localStorage.setItem('lec_last_session_date', getTodayKey());
 
   if(c.unit==='count'){
     if(type==='easy'){/* remove permanently */}
@@ -1390,11 +1436,22 @@ function openSettings(){
   document.getElementById('set-autoplay').checked=!!cfg.autoplay;
   updateToggleStyle();
   document.getElementById('set-daily-limit').value=cfg.dailyLimit||50;
+  var mode=cfg.studyMode||'daily';
+  document.getElementById('mode-daily').checked=(mode==='daily');
+  document.getElementById('mode-continuous').checked=(mode==='continuous');
+  updateModeLabels();
   document.getElementById('settings-overlay').classList.add('open');
 }
 function updateToggleStyle(){
   var tog=document.getElementById('toggle-autoplay');
   tog.style.background=document.getElementById('set-autoplay').checked?'#6558f5':'#e5e7eb';
+}
+function updateModeLabels(){
+  var isDailyChecked=document.getElementById('mode-daily').checked;
+  document.getElementById('mode-daily-label').style.borderColor=isDailyChecked?'#6558f5':'#e5e7eb';
+  document.getElementById('mode-daily-label').style.background=isDailyChecked?'#f0f0fd':'#f9fafb';
+  document.getElementById('mode-continuous-label').style.borderColor=!isDailyChecked?'#6558f5':'#e5e7eb';
+  document.getElementById('mode-continuous-label').style.background=!isDailyChecked?'#f0f0fd':'#f9fafb';
 }
 document.addEventListener('DOMContentLoaded',function(){
   var chk=document.getElementById('set-autoplay');
@@ -1408,9 +1465,12 @@ document.getElementById('settings-save').addEventListener('click',function(){
   });
   cfg.autoplay=document.getElementById('set-autoplay').checked;
   cfg.dailyLimit=parseInt(document.getElementById('set-daily-limit').value)||50;
+  cfg.studyMode=document.getElementById('mode-daily').checked?'daily':'continuous';
   saveCfg();updateBtnLabels();document.getElementById('settings-overlay').classList.remove('open');
 });
 document.getElementById('set-autoplay').addEventListener('change',updateToggleStyle);
+document.getElementById('mode-daily').addEventListener('change',updateModeLabels);
+document.getElementById('mode-continuous').addEventListener('change',updateModeLabels);
 
 // Autoplay confirm overlay
 document.getElementById('autoplay-confirm-ok').addEventListener('click',function(){
